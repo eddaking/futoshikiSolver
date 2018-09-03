@@ -1,10 +1,13 @@
+#python3
 import tkinter as TKI
+#object for each node in the puzzle
 class Node:
 	def __init__(self, entry):
 		self.changeable = True
 		self.lthan = []
 		self.gthan = []
 		self.entry = entry
+	#boolean - is changeable if was not an original input
 	def ischangeable(self):
 		return self.changeable
 	def getlthan(self):
@@ -22,10 +25,12 @@ class Node:
 		self.lthan.append([x, y])
 	def setunchangeable(self):
 		self.changeable = False
+#class containing the UI creation, and initial state returns.
 class UserInter:
 	def __init__(self, root):
 		frame = TKI.Frame(root)
 		frame.pack()
+		#array of input boxes
 		self.entryarr = []
 		self.thans = []
 		for i in range(0, 9):
@@ -36,27 +41,29 @@ class UserInter:
 				self.thans[i].append([])
 				if (j%2 == 0):
 					self.entryarr[int(i/2)].append([])
-				#probs a better way of doing this but hey no internet
+				#9x9 main grid, containing drop down menus for >/< signs in between numerical input textboxes.
+				#textboxes in odd x odd locations e.g 1x1 3x3 etc
 				if(i%2 == 0):
 					if(j%2 == 0):
 						ent = TKI.Entry(frame)
 						ent.grid(row=i, column=j)
 						self.entryarr[ int(i/2)][int(j/2)] = Node(ent)
 					else:
-						ting = TKI.StringVar()
-						ting.set(None)
-						TKI.OptionMenu(frame, ting, None, "<", ">").grid(row=i, column=j)
-						self.thans[i][j] = ting
+						temp = TKI.StringVar()
+						temp.set(None)
+						TKI.OptionMenu(frame, temp, None, "<", ">").grid(row=i, column=j)
+						self.thans[i][j] = temp
 				else:
 					if(j%2 == 0):
-						ting = TKI.StringVar()
-						ting.set(None)
-						TKI.OptionMenu(frame, ting, None, "<", ">").grid(row=i, column=j)
-						self.thans[i][j] = ting
+						temp = TKI.StringVar()
+						temp.set(None)
+						TKI.OptionMenu(frame, temp, None, "<", ">").grid(row=i, column=j)
+						self.thans[i][j] = temp
 	def getthans(self):
 		return self.thans
 	def getentryarr(self):
 		return self.entryarr
+#class containing the main operation logic
 class Logic:
 	def __init__(self, gui):
 		self.nodes = gui.getentryarr()
@@ -65,11 +72,14 @@ class Logic:
 		self.setstartvals()
 		self.getthans()
 		self.recfunc()
+	#function to find 
 	def setstartvals(self):
 		for x in range(0,5):
 			for y in range(0,5):
 				if self.nodes[x][y].getval() != "":
 					self.nodes[x][y].setunchangeable()
+	#function which takes the locations of inequalities, and adds the correct containts to nodes involved in the inequality
+	#array of thans is 9x9, array of entries is 5x5
 	def getthans(self):
 		for i in range(0, len(self.thans)):
 			evenx = (i%2 == 0)
@@ -80,7 +90,7 @@ class Logic:
 					if (str(than) != "None"):
 						x = int(i/2)
 						y = int(j/2)
-						#if x even, do left right
+						#if x even, horizontal inequality
 						if(evenx):
 							if (than == '<'):
 								self.nodes[x][y].addlthan(x, y+1)
@@ -88,7 +98,7 @@ class Logic:
 							else:
 								self.nodes[x][y].addgthan(x, y+1)
 								self.nodes[x][y+1].addlthan(x, y)
-						#if y even do up down
+						#if y even vertical inequality
 						if(eveny):
 							if (than == '<'):
 								self.nodes[x][y].addlthan(x+1, y)
